@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/admin_layout :: layout('Catálogo VIP | GymLink Admin', 'rewards', ~{::main})}">
+<body>
+<main>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <span class="text-neon small fw-bold text-uppercase">Inventario de Recompensas</span>
+            <h1 class="fw-bolder text-white mb-0">Gestor de Catálogo VIP</h1>
+        </div>
+        <button type="button" class="btn btn-neon rounded-pill px-4"
+                data-bs-toggle="modal" data-bs-target="#rewardFormModal"
+                onclick="openRewardFormModal(null)">
+            <i class="bi bi-plus-lg me-1"></i>Crear Nuevo Premio
+        </button>
+    </div>
+
+    <div class="bento-card overflow-hidden">
+        <div class="p-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+            <input type="text" data-table-search="adminRewardsTable"
+                   class="form-control bg-dark border-secondary border-opacity-25 text-white rounded-pill"
+                   style="max-width: 340px;" placeholder="Buscar premio en catálogo...">
+        </div>
+        <div class="table-responsive">
+            <table class="table table-athletic align-middle mb-0" id="adminRewardsTable">
+                <thead>
+                <tr>
+                    <th class="ps-4">Premio</th>
+                    <th>Categoría</th>
+                    <th>Tipo</th>
+                    <th>Costo</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th class="pe-4 text-end">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="reward : ${rewards}">
+                    <td class="ps-4">
+                        <div class="fw-bold text-white" th:text="${reward.name}">Spotify Premium 1 Mes</div>
+                        <small class="text-secondary" th:text="${reward.description}">PIN digital oficial</small>
+                    </td>
+                    <td><span class="badge bg-dark border border-secondary border-opacity-25" th:text="${reward.category}">DIGITAL</span></td>
+                    <td>
+                        <span class="badge rounded-pill"
+                              th:classappend="${reward.type == 'DIGITAL'} ? 'bg-neon-soft' : 'bg-fire-soft'"
+                              th:text="${reward.type}">DIGITAL</span>
+                    </td>
+                    <td class="font-mono-tabular fw-bold text-neon" th:text="${reward.pointsCost} + ' PTS'">1800 PTS</td>
+                    <td class="font-mono-tabular fw-bold text-white" th:text="${reward.stock}">25</td>
+                    <td>
+                        <span class="badge rounded-pill"
+                              th:classappend="${reward.active} ? 'bg-neon-soft' : 'bg-secondary bg-opacity-25 text-secondary'"
+                              th:text="${reward.active} ? 'Activo' : 'Pausado'">Activo</span>
+                    </td>
+                    <td class="pe-4 text-end">
+                        <div class="d-inline-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-ghost-dark rounded-pill px-3"
+                                    data-bs-toggle="modal" data-bs-target="#rewardFormModal"
+                                    th:attr="data-id=${reward.id},
+                                             data-name=${reward.name},
+                                             data-description=${reward.description},
+                                             data-category=${reward.category},
+                                             data-type=${reward.type},
+                                             data-cost=${reward.pointsCost},
+                                             data-stock=${reward.stock}"
+                                    onclick="openRewardFormModal(this)">
+                                <i class="bi bi-pencil-square me-1"></i>Editar
+                            </button>
+                            <form th:action="@{/admin/rewards/{id}/toggle(id=${reward.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-ghost-dark rounded-pill px-3"
+                                        th:text="${reward.active} ? 'Pausar' : 'Activar'">Pausar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Crear / Editar Premio -->
+    <div class="modal fade" id="rewardFormModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border border-secondary border-opacity-25 rounded-4">
+                <div class="modal-header border-secondary border-opacity-25">
+                    <h5 class="modal-title fw-bold text-white" id="rewardModalLabel">Nuevo Premio VIP</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/admin/rewards/save}" method="post">
+                    <div class="modal-body p-4 d-flex flex-column gap-3">
+                        <input type="hidden" id="adminRewardId" name="id">
+
+                        <div>
+                            <label class="form-label small text-secondary">Nombre del Premio</label>
+                            <input type="text" id="adminRewardName" name="name" required
+                                   class="form-control bg-black border-secondary border-opacity-25 text-white"
+                                   placeholder="Ej. 1 Mes Spotify Premium">
+                        </div>
+
+                        <div>
+                            <label class="form-label small text-secondary">Descripción</label>
+                            <textarea id="adminRewardDescription" name="description" rows="2" required
+                                      class="form-control bg-black border-secondary border-opacity-25 text-white"></textarea>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label small text-secondary">Categoría</label>
+                                <select id="adminRewardCategory" name="category" class="form-select bg-black border-secondary border-opacity-25 text-white">
+                                    <option value="DIGITAL">Digital &amp; Spotify</option>
+                                    <option value="SUPLEMENTOS">Suplementos</option>
+                                    <option value="MERCH">Merch</option>
+                                    <option value="BENEFICIOS">Beneficios Gym</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-secondary">Tipo de Entrega</label>
+                                <select id="adminRewardType" name="type" class="form-select bg-black border-secondary border-opacity-25 text-white">
+                                    <option value="DIGITAL">Digital (PIN Instantáneo)</option>
+                                    <option value="FISICO">Físico (Retiro con QR)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label small text-secondary">Costo en Puntos</label>
+                                <input type="number" id="adminRewardCost" name="pointsCost" min="50" required
+                                       class="form-control bg-black border-secondary border-opacity-25 text-white font-mono-tabular">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-secondary">Stock Disponible</label>
+                                <input type="number" id="adminRewardStock" name="stock" min="0" required
+                                       class="form-control bg-black border-secondary border-opacity-25 text-white font-mono-tabular">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary border-opacity-25">
+                        <button type="button" class="btn btn-ghost-dark rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-neon rounded-pill px-4">Guardar Premio</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

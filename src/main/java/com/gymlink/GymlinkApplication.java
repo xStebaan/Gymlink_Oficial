@@ -5,9 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class GymlinkApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(GymlinkApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(GymlinkApplication.class, args);
+    }
 }

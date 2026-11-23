@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/admin_layout :: layout('Directorio de Atletas | GymLink Admin', 'members', ~{::main})}">
+<body>
+<main>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <span class="text-neon small fw-bold text-uppercase">Comunidad Registrada</span>
+            <h1 class="fw-bolder text-white mb-0">Directorio de Atletas</h1>
+        </div>
+        <div class="input-group" style="max-width: 340px;">
+            <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" data-table-search="adminMembersTable"
+                   class="form-control bg-dark border-secondary border-opacity-25 text-white"
+                   placeholder="Buscar por nombre, cédula o rango...">
+        </div>
+    </div>
+
+    <div class="bento-card overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-athletic align-middle mb-0" id="adminMembersTable">
+                <thead>
+                <tr>
+                    <th class="ps-4">Atleta</th>
+                    <th>Cédula</th>
+                    <th>Rango VIP</th>
+                    <th>XP Total</th>
+                    <th>Puntos</th>
+                    <th>Racha</th>
+                    <th>Escudos</th>
+                    <th class="pe-4 text-end">Acciones Rápidas</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="m : ${members}">
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar-circle" th:text="${m.initials}">MV</div>
+                            <div>
+                                <div class="fw-bold text-white" th:text="${m.fullName}">Mateo Vargas</div>
+                                <small class="text-secondary" th:text="${m.email}">mateo@gymlink.fit</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="font-mono-tabular text-secondary" th:text="${m.documentNumber}">1020304050</td>
+                    <td>
+                        <span class="vip-badge" th:classappend="'vip-' + ${m.vipRank}" th:text="${m.vipRank}">ORO</span>
+                    </td>
+                    <td class="font-mono-tabular fw-bold text-white" th:text="${#numbers.formatInteger(m.xp, 1, 'POINT')}">4.850</td>
+                    <td class="font-mono-tabular fw-bolder text-neon" th:text="${#numbers.formatInteger(m.pointsBalance, 1, 'POINT')}">1.420</td>
+                    <td class="font-mono-tabular fw-bold text-fire">🔥 <span th:text="${m.streakDays}">14</span>d</td>
+                    <td class="font-mono-tabular text-info fw-bold">
+                        <i class="bi bi-shield-fill-check me-1"></i><span th:text="${m.shields}">2</span>
+                    </td>
+                    <td class="pe-4 text-end">
+                        <div class="d-inline-flex gap-2">
+                            <a th:href="@{/admin/checkin(query=${m.documentNumber})}"
+                               class="btn btn-sm btn-neon rounded-pill px-3" title="Ir a check-in">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>Check-in
+                            </a>
+                            <form th:action="@{/admin/members/{id}/shield(id=${m.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-ghost-dark rounded-pill px-3"
+                                        title="Otorgar Escudo Protector">
+                                    <i class="bi bi-shield-plus text-info me-1"></i>+1 Escudo
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(members)}">
+                    <td colspan="8" class="text-center py-5 text-secondary">No hay atletas registrados en la plataforma.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

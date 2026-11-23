@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/member_layout :: layout('Tienda VIP | GymLink', 'rewards', ~{::main})}">
+<body>
+<main>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <span class="text-neon small fw-bold text-uppercase">Catálogo Exclusivo</span>
+            <h1 class="fw-bolder text-white mb-0">Tienda VIP de Recompensas</h1>
+        </div>
+        <div class="bento-card px-4 py-2 d-flex align-items-center gap-3">
+            <div>
+                <small class="text-secondary d-block">Tu Saldo Disponible</small>
+                <span class="font-mono-tabular fs-4 fw-bolder text-neon"
+                      th:text="${currentMember != null ? #numbers.formatInteger(currentMember.pointsBalance, 1, 'POINT') : '1.420'}">1.420</span>
+                <span class="text-neon fw-bold small">PTS</span>
+            </div>
+            <a th:href="@{/member/wallet}" class="btn btn-sm btn-ghost-dark rounded-pill px-3">
+                <i class="bi bi-wallet2 me-1"></i>Ver Mis Cupones
+            </a>
+        </div>
+    </div>
+
+    <!-- Barra de Filtros JS + Buscador -->
+    <div class="bento-card p-3 mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-8 d-flex flex-wrap gap-2">
+                <button type="button" data-reward-filter="ALL" class="btn btn-sm btn-neon active rounded-pill px-3">Todos</button>
+                <button type="button" data-reward-filter="DIGITAL" class="btn btn-sm btn-ghost-dark rounded-pill px-3">
+                    <i class="bi bi-spotify me-1 text-neon"></i>Digital &amp; Spotify
+                </button>
+                <button type="button" data-reward-filter="SUPLEMENTOS" class="btn btn-sm btn-ghost-dark rounded-pill px-3">
+                    <i class="bi bi-capsule me-1 text-fire"></i>Suplementos
+                </button>
+                <button type="button" data-reward-filter="MERCH" class="btn btn-sm btn-ghost-dark rounded-pill px-3">
+                    <i class="bi bi-bag me-1 text-info"></i>Merch
+                </button>
+                <button type="button" data-reward-filter="BENEFICIOS" class="btn btn-sm btn-ghost-dark rounded-pill px-3">
+                    <i class="bi bi-stars me-1 text-warning"></i>Beneficios Gym
+                </button>
+            </div>
+            <div class="col-lg-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-dark border-secondary border-opacity-25 text-secondary">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="rewardSearchInput"
+                           class="form-control bg-dark border-secondary border-opacity-25 text-white"
+                           placeholder="Buscar premio (ej. Spotify, Proteína)...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de Premios -->
+    <div class="row g-4" id="rewardsGrid">
+        <div class="col-md-6 col-xl-4" th:each="reward : ${rewards}"
+             th:attr="data-reward-category=${reward.category}, data-reward-title=${reward.name}">
+            <div class="bento-card bento-card-interactive p-4 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="badge rounded-pill px-3 py-2"
+                              th:classappend="${reward.type == 'DIGITAL'} ? 'bg-neon-soft' : 'bg-fire-soft'">
+                            <i class="bi me-1" th:classappend="${reward.type == 'DIGITAL'} ? 'bi-lightning-fill' : 'bi-box-seam'"></i>
+                            <span th:text="${reward.type == 'DIGITAL'} ? 'Digital Instantáneo' : 'Retiro Físico'">Digital</span>
+                        </span>
+                        <small class="font-mono-tabular text-secondary">
+                            Stock: <strong class="text-white" th:text="${reward.stock}">15</strong>
+                        </small>
+                    </div>
+
+                    <div class="rounded-4 bg-dark border border-secondary border-opacity-25 p-3 mb-3 text-center">
+                        <i class="bi fs-1"
+                           th:classappend="${reward.category == 'DIGITAL'} ? 'bi-spotify text-neon' : (${reward.category == 'SUPLEMENTOS'} ? 'bi-cup-straw text-fire' : (${reward.category == 'MERCH'} ? 'bi-bag-check text-info' : 'bi-award text-warning'))"></i>
+                    </div>
+
+                    <h5 class="fw-bold text-white mb-2" th:text="${reward.name}">Spotify Premium 1 Mes</h5>
+                    <p class="text-secondary small mb-3" th:text="${reward.description}">
+                        PIN digital oficial para activar 30 días de música sin anuncios mientras entrenas.
+                    </p>
+                </div>
+
+                <div class="pt-3 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between">
+                    <div>
+                        <small class="text-secondary d-block">Costo</small>
+                        <span class="font-mono-tabular fs-4 fw-bolder text-neon" th:text="${reward.pointsCost}">1800</span>
+                        <small class="text-neon fw-bold">PTS</small>
+                    </div>
+
+                    <button type="button"
+                            class="btn rounded-pill px-4"
+                            th:classappend="${reward.stock > 0 and (currentMember == null or currentMember.pointsBalance >= reward.pointsCost)} ? 'btn-neon' : 'btn-ghost-dark'"
+                            th:disabled="${reward.stock <= 0 or (currentMember != null and currentMember.pointsBalance < reward.pointsCost)}"
+                            data-bs-toggle="modal" data-bs-target="#redeemConfirmModal"
+                            th:attr="data-reward-id=${reward.id},
+                                     data-reward-title=${reward.name},
+                                     data-reward-cost=${reward.pointsCost},
+                                     data-reward-type=${reward.type}">
+                        <span th:if="${reward.stock <= 0}">Agotado</span>
+                        <span th:if="${reward.stock > 0 and currentMember != null and currentMember.pointsBalance < reward.pointsCost}">Puntos insuficientes</span>
+                        <span th:if="${reward.stock > 0 and (currentMember == null or currentMember.pointsBalance >= reward.pointsCost)}">Canjear</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rewardsEmptyState" class="bento-card p-5 text-center d-none mt-3">
+        <i class="bi bi-search fs-1 text-secondary mb-2 d-block"></i>
+        <h5 class="text-white">No encontramos premios con ese filtro</h5>
+        <p class="text-secondary small mb-0">Prueba otra categoría o limpia el buscador.</p>
+    </div>
+
+    <!-- Modal Confirmación de Canje -->
+    <div class="modal fade" id="redeemConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border border-secondary border-opacity-25 rounded-4">
+                <div class="modal-header border-secondary border-opacity-25">
+                    <h5 class="modal-title fw-bold text-white"><i class="bi bi-bag-check-fill text-neon me-2"></i>Confirmar Canje VIP</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/member/rewards/redeem}" method="post">
+                    <div class="modal-body p-4">
+                        <input type="hidden" id="redeemRewardIdInput" name="rewardId" value="">
+                        <p class="text-secondary small mb-2">Estás a punto de canjear:</p>
+                        <h4 id="redeemModalTitle" class="fw-bold text-white mb-3">Premio VIP</h4>
+                        <div class="p-3 rounded-4 bg-black border border-secondary border-opacity-25 d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-secondary">Se descontarán de tu saldo:</span>
+                            <span id="redeemModalCost" class="font-mono-tabular fs-4 fw-bolder text-neon">1800 PTS</span>
+                        </div>
+                        <p id="redeemModalType" class="small text-info mb-0"></p>
+                    </div>
+                    <div class="modal-footer border-secondary border-opacity-25">
+                        <button type="button" class="btn btn-ghost-dark rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-neon rounded-pill px-4">Confirmar Canje</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

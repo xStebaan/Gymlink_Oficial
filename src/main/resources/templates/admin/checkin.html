@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/admin_layout :: layout('Terminal Check-in | GymLink Admin', 'checkin', ~{::main})}">
+<body>
+<main>
+    <div class="mb-4">
+        <span class="text-neon small fw-bold text-uppercase">Recepción 1-Clic</span>
+        <h1 class="fw-bolder text-white mb-0">Terminal Rápida de Check-in</h1>
+    </div>
+
+    <div class="row g-4">
+        <!-- Buscador + Tarjeta del Atleta Encontrado -->
+        <div class="col-lg-6">
+            <div class="bento-card p-4 mb-4">
+                <h5 class="fw-bold text-white mb-3">Buscar Atleta por Cédula o Nombre</h5>
+                <form th:action="@{/admin/checkin}" method="get" class="d-flex gap-2 mb-3">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-dark border-secondary border-opacity-25 text-neon">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="checkinSearchInput" name="query" th:value="${query}" autofocus
+                               class="form-control bg-dark border-secondary border-opacity-25 text-white font-mono-tabular"
+                               placeholder="Ej. 1020304050 o Mateo Vargas">
+                    </div>
+                    <button type="submit" class="btn btn-neon px-4 rounded-3">Buscar</button>
+                </form>
+
+                <!-- Accesos rápidos demo -->
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <small class="text-secondary">Prueba rápida:</small>
+                    <button type="button" data-quick-doc="1020304050" class="btn btn-sm btn-ghost-dark rounded-pill font-mono-tabular">1020304050</button>
+                    <button type="button" data-quick-doc="Sofía" class="btn btn-sm btn-ghost-dark rounded-pill">Sofía</button>
+                </div>
+            </div>
+
+            <!-- Tarjeta del Atleta Encontrado -->
+            <div th:if="${foundMember != null}" class="bento-card bento-hero p-4">
+                <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-circle avatar-circle-lg" th:text="${foundMember.initials}">MV</div>
+                        <div>
+                            <h4 class="fw-bolder text-white mb-1" th:text="${foundMember.fullName}">Mateo Vargas</h4>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="font-mono-tabular small text-secondary" th:text="'CC: ' + ${foundMember.documentNumber}">CC: 1020304050</span>
+                                <span class="vip-badge" th:classappend="'vip-' + ${foundMember.vipRank}" th:text="${foundMember.vipRank}">ORO</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-4">
+                        <div class="p-3 rounded-4 bg-black border border-secondary border-opacity-25 text-center">
+                            <small class="text-secondary d-block">Multiplicador</small>
+                            <span class="font-mono-tabular fs-4 fw-bolder text-neon" th:text="${foundMember.multiplier + 'x'}">1.5x</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 rounded-4 bg-black border border-secondary border-opacity-25 text-center">
+                            <small class="text-secondary d-block">Racha Actual</small>
+                            <span class="font-mono-tabular fs-4 fw-bolder text-fire">🔥 <span th:text="${foundMember.streakDays}">14</span>d</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 rounded-4 bg-black border border-secondary border-opacity-25 text-center">
+                            <small class="text-secondary d-block">Saldo</small>
+                            <span class="font-mono-tabular fs-4 fw-bolder text-white" th:text="${foundMember.pointsBalance}">1420</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form th:action="@{/admin/checkin}" method="post">
+                    <input type="hidden" name="memberId" th:value="${foundMember.id}">
+                    <button type="submit" class="btn btn-neon w-100 py-3 rounded-4 fs-5 shadow-lg">
+                        <i class="bi bi-lightning-charge-fill me-2"></i>
+                        Registrar Entrada y Sumar Puntos
+                    </button>
+                </form>
+            </div>
+
+            <div th:if="${query != null and !query.isEmpty() and foundMember == null}" class="bento-card p-4 text-center">
+                <i class="bi bi-person-x fs-1 text-fire d-block mb-2"></i>
+                <h5 class="text-white">No se encontró ningún atleta</h5>
+                <p class="text-secondary small mb-0">Verifica el número de cédula o nombre ingresado.</p>
+            </div>
+        </div>
+
+        <!-- Tabla de Últimos Ingresos del Día -->
+        <div class="col-lg-6">
+            <div class="bento-card overflow-hidden h-100">
+                <div class="p-4 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-white mb-0"><i class="bi bi-clock-history text-neon me-2"></i>Últimos Ingresos de Hoy</h5>
+                    <span class="badge bg-neon-soft rounded-pill px-3" th:text="${#lists.size(todayCheckins)} + ' hoy'">12 hoy</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-athletic align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th class="ps-4">Hora</th>
+                            <th>Atleta</th>
+                            <th>Racha</th>
+                            <th class="pe-4 text-end">Puntos</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="entry : ${todayCheckins}">
+                            <td class="ps-4 font-mono-tabular small text-secondary" th:text="${entry.timeFormatted}">07:42 AM</td>
+                            <td>
+                                <div class="fw-bold text-white" th:text="${entry.memberName}">Mateo Vargas</div>
+                                <small class="text-secondary font-mono-tabular" th:text="${entry.documentNumber}">1020304050</small>
+                            </td>
+                            <td class="font-mono-tabular text-fire fw-bold">🔥 <span th:text="${entry.streakAfter}">15</span>d</td>
+                            <td class="pe-4 text-end font-mono-tabular fw-bolder text-neon" th:text="'+' + ${entry.pointsAwarded} + ' PTS'">+150 PTS</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(todayCheckins)}">
+                            <td colspan="4" class="text-center py-5 text-secondary">Sin ingresos registrados hoy todavía.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

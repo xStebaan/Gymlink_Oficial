@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/member_layout :: layout('Mi Billetera | GymLink', 'wallet', ~{::main})}">
+<body>
+<main>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <span class="text-neon small fw-bold text-uppercase">Pases Digitales &amp; PINs</span>
+            <h1 class="fw-bolder text-white mb-0">Mi Billetera VIP</h1>
+        </div>
+        <a th:href="@{/member/rewards}" class="btn btn-neon rounded-pill px-4">
+            <i class="bi bi-plus-lg me-1"></i>Canjear Nuevo Premio
+        </a>
+    </div>
+
+    <ul class="nav nav-pills gap-2 mb-4" id="walletTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill px-4 fw-bold" id="active-tab"
+                    data-bs-toggle="pill" data-bs-target="#activePassesPane" type="button" role="tab">
+                <i class="bi bi-ticket-perforated-fill me-1"></i>Cupones Activos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill px-4 fw-bold text-secondary" id="history-tab"
+                    data-bs-toggle="pill" data-bs-target="#usedPassesPane" type="button" role="tab">
+                <i class="bi bi-archive me-1"></i>Historial Entregados
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="activePassesPane" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-md-6" th:each="pass : ${activeRedemptions}">
+                    <div class="digital-pass p-4 h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <span class="badge rounded-pill px-3 py-2"
+                                      th:classappend="${pass.digital} ? 'bg-neon-soft' : 'bg-fire-soft'">
+                                    <i class="bi me-1" th:classappend="${pass.digital} ? 'bi-spotify' : 'bi-qr-code'"></i>
+                                    <span th:text="${pass.digital} ? 'PIN Digital Listo' : 'Pase de Recepción'">Pase VIP</span>
+                                </span>
+                                <span class="font-mono-tabular small fw-bold text-neon" th:text="${pass.code}">GL-8942</span>
+                            </div>
+
+                            <h4 class="fw-bold text-white mb-1" th:text="${pass.rewardName}">1 Mes Spotify Premium</h4>
+                            <p class="text-secondary small mb-3">
+                                Canjeado el <span th:text="${pass.redeemedAtFormatted}">21 Nov 2026</span> ·
+                                <span class="font-mono-tabular" th:text="${pass.pointsSpent}">1800</span> PTS
+                            </p>
+                        </div>
+
+                        <div th:if="${pass.digital}" class="pin-box d-flex align-items-center justify-content-between gap-2">
+                            <div>
+                                <small class="text-secondary d-block" style="font-size: 0.7rem;">PIN DE ACTIVACIÓN</small>
+                                <span class="font-mono-tabular fw-bolder text-neon fs-5" th:text="${pass.digitalPin}">SPTF-9941-GYM2</span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-ghost-dark rounded-pill px-3"
+                                    th:attr="onclick='copyPinToClipboard(\'' + ${pass.digitalPin} + '\', this)'">
+                                <i class="bi bi-clipboard me-1"></i>Copiar PIN
+                            </button>
+                        </div>
+
+                        <div th:if="${!pass.digital}" class="d-flex align-items-center justify-content-between gap-2 pt-2 border-top border-secondary border-opacity-25">
+                            <span class="small text-warning"><i class="bi bi-hourglass-split me-1"></i>Pendiente de entrega física</span>
+                            <button type="button" class="btn btn-sm btn-neon rounded-pill px-3"
+                                    data-bs-toggle="modal" data-bs-target="#walletQrModal"
+                                    th:attr="data-pass-code=${pass.code},
+                                             data-pass-title=${pass.rewardName},
+                                             data-pass-status='PENDIENTE ENTREGA'">
+                                <i class="bi bi-qr-code-scan me-1"></i>Mostrar QR
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12" th:if="${#lists.isEmpty(activeRedemptions)}">
+                    <div class="bento-card p-5 text-center">
+                        <i class="bi bi-wallet2 fs-1 text-secondary mb-2 d-block"></i>
+                        <h5 class="text-white">No tienes cupones activos por ahora</h5>
+                        <p class="text-secondary small mb-3">Visita la Tienda VIP y canjea tus puntos por recompensas reales.</p>
+                        <a th:href="@{/member/rewards}" class="btn btn-neon rounded-pill px-4">Ir a Tienda VIP</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="usedPassesPane" role="tabpanel">
+            <div class="bento-card overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-athletic align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th class="ps-4">Código</th>
+                            <th>Recompensa</th>
+                            <th>Tipo</th>
+                            <th>Puntos</th>
+                            <th>Fecha</th>
+                            <th class="pe-4 text-end">Estado</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${pastRedemptions}">
+                            <td class="ps-4 font-mono-tabular fw-bold text-white" th:text="${item.code}">GL-4510</td>
+                            <td class="fw-semibold text-white" th:text="${item.rewardName}">Shaker GymLink Pro</td>
+                            <td>
+                                <span class="badge bg-dark border border-secondary border-opacity-25"
+                                      th:text="${item.digital} ? 'DIGITAL' : 'FÍSICO'">FÍSICO</span>
+                            </td>
+                            <td class="font-mono-tabular text-fire" th:text="'-' + ${item.pointsSpent} + ' PTS'">-650 PTS</td>
+                            <td class="text-secondary small" th:text="${item.redeemedAtFormatted}">12 Nov 2026</td>
+                            <td class="pe-4 text-end">
+                                <span class="badge bg-neon-soft rounded-pill px-3">Entregado</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(pastRedemptions)}">
+                            <td colspan="6" class="text-center py-4 text-secondary">Sin historial de entregas todavía.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal QR Grande -->
+    <div class="modal fade" id="walletQrModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border border-secondary border-opacity-25 rounded-4">
+                <div class="modal-header border-secondary border-opacity-25">
+                    <h5 class="modal-title fw-bold text-white">Pase de Entrega en Recepción</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <span id="qrModalStatus" class="badge bg-fire-soft rounded-pill px-3 py-2 mb-2">PENDIENTE ENTREGA</span>
+                    <h4 id="qrModalRewardTitle" class="fw-bold text-white mb-3">Premio Físico</h4>
+                    <div class="p-3 rounded-4 bg-black border border-success border-opacity-25 d-inline-block mb-3">
+                        <img id="qrModalImg" src="" alt="Código QR Pase" width="220" height="220" class="rounded-3">
+                    </div>
+                    <div class="font-mono-tabular fs-3 fw-bolder text-neon mb-1" id="qrModalCodeText">GL-0000</div>
+                    <p class="text-secondary small mb-0">Muestra este código al equipo de recepción para validar tu entrega.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

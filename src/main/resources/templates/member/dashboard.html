@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/member_layout :: layout('Mi Panel Atlético | GymLink', 'dashboard', ~{::main})}">
+<body>
+<main>
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+        <div>
+            <span class="text-neon small fw-bold text-uppercase tracking-wider">Panel de Rendimiento</span>
+            <h1 class="fw-bolder text-white mb-0">
+                Hola, <span th:text="${member != null ? member.firstName : 'Mateo'}">Mateo</span> ⚡
+            </h1>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/member/feed}" class="btn btn-ghost-dark rounded-pill px-3">
+                <i class="bi bi-megaphone me-1 text-fire"></i>Publicar Entreno
+            </a>
+            <a th:href="@{/member/rewards}" class="btn btn-neon rounded-pill px-3">
+                <i class="bi bi-bag-heart-fill me-1"></i>Canjear Puntos
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Tarjeta Hero -->
+        <div class="col-lg-7">
+            <div class="bento-card bento-hero p-4 h-100 d-flex flex-column justify-content-between">
+                <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+                    <div>
+                        <span class="vip-badge mb-2"
+                              th:classappend="'vip-' + (${member != null ? member.vipRank : 'ORO'})">
+                            <i class="bi bi-gem"></i>
+                            Rango <span th:text="${member != null ? member.vipRank : 'ORO'}">ORO</span>
+                        </span>
+                        <h2 class="fw-bolder text-white mb-1">
+                            Multiplicador <span class="text-neon font-mono-tabular"
+                                                th:text="${member != null ? member.multiplier + 'x' : '1.5x'}">1.5x</span>
+                        </h2>
+                        <p class="text-secondary small mb-0">
+                            Cada check-in en recepción y misión completada multiplica tus puntos automáticamente.
+                        </p>
+                    </div>
+                    <div class="text-end bg-dark bg-opacity-75 border border-secondary border-opacity-25 rounded-4 px-3 py-2">
+                        <small class="text-secondary d-block">Saldo Actual</small>
+                        <span class="font-mono-tabular fs-3 fw-bolder text-neon"
+                              th:text="${member != null ? #numbers.formatInteger(member.pointsBalance, 1, 'POINT') : '1.420'}">1.420</span>
+                        <span class="text-neon small fw-bold">PTS</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="d-flex justify-content-between align-items-center small mb-2">
+                        <span class="text-secondary">
+                            Progreso hacia <strong class="text-white" th:text="${nextRankName ?: 'TITÁN'}">TITÁN</strong>
+                        </span>
+                        <span class="font-mono-tabular fw-bold text-neon">
+                            <span th:text="${member != null ? member.xp : 4850}">4850</span> /
+                            <span th:text="${nextRankXp ?: 6000}">6000</span> XP
+                        </span>
+                    </div>
+                    <div class="progress progress-athletic">
+                        <div class="progress-bar progress-bar-neon" role="progressbar"
+                             th:style="'width:' + (${rankProgressPercent ?: 81}) + '%'"></div>
+                    </div>
+                    <div class="d-flex justify-content-between text-secondary mt-2" style="font-size: 0.75rem;">
+                        <span>Te faltan <strong class="text-white font-mono-tabular" th:text="${xpRemaining ?: 1150}">1150</strong> XP para el rango máximo</span>
+                        <span>Beneficio próximo: <strong class="text-neon">2.0x Puntos</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Racha Semanal L-M-X-J-V-S-D + Escudos -->
+        <div class="col-lg-5">
+            <div class="bento-card p-4 h-100 d-flex flex-column justify-content-between">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <span class="text-fire small fw-bold text-uppercase">Consistencia</span>
+                        <h4 class="fw-bold text-white mb-0">
+                            Racha de <span class="font-mono-tabular text-fire" th:text="${member != null ? member.streakDays : 14}">14</span> días 🔥
+                        </h4>
+                    </div>
+                    <div class="px-3 py-2 rounded-4 bg-dark border border-info border-opacity-25 text-center">
+                        <i class="bi bi-shield-fill-check text-info fs-5 d-block"></i>
+                        <span class="font-mono-tabular fw-bold text-info small"
+                              th:text="${member != null ? member.shields : 2} + ' Escudos'">2 Escudos</span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between gap-1 my-2">
+                    <th:block th:if="${weeklyDays != null}">
+                        <div th:each="day : ${weeklyDays}" class="day-pill"
+                             th:classappend="${day.completed} ? 'done' : (${day.shielded} ? 'shielded' : (${day.today} ? 'today' : ''))">
+                            <small class="fw-bold" th:text="${day.shortName}">L</small>
+                            <i class="bi"
+                               th:classappend="${day.completed} ? 'bi-fire fs-5' : (${day.shielded} ? 'bi-shield-check fs-5' : 'bi-circle text-secondary opacity-50')"></i>
+                        </div>
+                    </th:block>
+                    <th:block th:if="${weeklyDays == null}">
+                        <div class="day-pill done"><small class="fw-bold">L</small><i class="bi bi-fire fs-5"></i></div>
+                        <div class="day-pill done"><small class="fw-bold">M</small><i class="bi bi-fire fs-5"></i></div>
+                        <div class="day-pill shielded"><small class="fw-bold">X</small><i class="bi bi-shield-check fs-5"></i></div>
+                        <div class="day-pill done"><small class="fw-bold">J</small><i class="bi bi-fire fs-5"></i></div>
+                        <div class="day-pill done today"><small class="fw-bold">V</small><i class="bi bi-fire fs-5"></i></div>
+                        <div class="day-pill"><small class="fw-bold">S</small><i class="bi bi-circle text-secondary opacity-50"></i></div>
+                        <div class="day-pill"><small class="fw-bold">D</small><i class="bi bi-circle text-secondary opacity-50"></i></div>
+                    </th:block>
+                </div>
+
+                <p class="text-secondary small mb-0 mt-2">
+                    <i class="bi bi-info-circle text-info me-1"></i>
+                    Tus escudos protegen tu racha automáticamente si faltas 1 día.
+                </p>
+            </div>
+        </div>
+
+        <!-- Meta Próxima Recompensa -->
+        <div class="col-12">
+            <div class="bento-card p-4" style="background: linear-gradient(90deg, rgba(0, 245, 155, 0.08), #121215 65%);">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <div class="rounded-4 d-flex align-items-center justify-content-center bg-neon-soft" style="width: 48px; height: 48px;">
+                                <i class="bi bi-spotify fs-3"></i>
+                            </div>
+                            <div>
+                                <span class="badge bg-neon-soft rounded-pill mb-1">Meta Próxima Recompensa</span>
+                                <h5 class="fw-bold text-white mb-0"
+                                    th:text="${targetReward != null ? targetReward.name : '1 Mes de Spotify Premium Individual'}">
+                                    1 Mes de Spotify Premium Individual
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="progress progress-athletic mt-3">
+                            <div class="progress-bar progress-bar-fire" role="progressbar"
+                                 th:style="'width:' + (${rewardProgressPercent ?: 78}) + '%'"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="font-mono-tabular fw-bolder fs-4 text-white">
+                            <span class="text-neon" th:text="${member != null ? member.pointsBalance : 1420}">1420</span>
+                            /
+                            <span th:text="${targetReward != null ? targetReward.pointsCost : 1800}">1800</span> PTS
+                        </div>
+                        <small class="text-secondary d-block mb-2">
+                            ¡Solo te faltan <strong class="text-fire font-mono-tabular" th:text="${pointsToTarget ?: 380}">380</strong> puntos para tu PIN digital!
+                        </small>
+                        <a th:href="@{/member/rewards}" class="btn btn-sm btn-ghost-dark rounded-pill px-3">
+                            Ver en Tienda VIP <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Misiones Relámpago -->
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div>
+                    <h4 class="fw-bold text-white mb-0"><i class="bi bi-lightning-fill text-neon me-2"></i>Misiones Relámpago</h4>
+                    <small class="text-secondary">Completa retos semanales y reclama bonos de Puntos y XP</small>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4" th:each="mission : ${missions}">
+                    <div class="bento-card bento-card-interactive p-4 h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <span class="badge bg-dark border border-secondary border-opacity-25 text-secondary rounded-pill"
+                                      th:text="${mission.frequency}">SEMANAL</span>
+                                <span class="font-mono-tabular fw-bold text-neon small">
+                                    +<span th:text="${mission.pointsReward}">250</span> PTS · +<span th:text="${mission.xpReward}">150</span> XP
+                                </span>
+                            </div>
+                            <h5 class="fw-bold text-white mb-2" th:text="${mission.title}">Asiste 4 días esta semana</h5>
+                            <p class="text-secondary small mb-3" th:text="${mission.description}">
+                                Registra 4 entradas en recepción antes del domingo.
+                            </p>
+                        </div>
+
+                        <div>
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-secondary">Avance</span>
+                                <span class="font-mono-tabular text-white fw-bold"
+                                      th:text="${mission.currentProgress + '/' + mission.targetProgress}">4/4</span>
+                            </div>
+                            <div class="progress progress-athletic mb-3">
+                                <div class="progress-bar progress-bar-neon"
+                                     th:style="'width:' + (${mission.progressPercent}) + '%'"></div>
+                            </div>
+
+                            <form th:if="${mission.claimable and !mission.claimed}"
+                                  th:action="@{/member/challenges/{id}/claim(id=${mission.id})}" method="post">
+                                <button type="submit" class="btn btn-neon w-100 rounded-3">
+                                    <i class="bi bi-gift-fill me-1"></i>Reclamar Recompensa
+                                </button>
+                            </form>
+                            <button th:if="${mission.claimed}" disabled class="btn btn-ghost-dark w-100 rounded-3 opacity-75">
+                                <i class="bi bi-check2-circle text-neon me-1"></i>Recompensa Reclamada
+                            </button>
+                            <button th:if="${!mission.claimable and !mission.claimed}" disabled class="btn btn-ghost-dark w-100 rounded-3">
+                                En Progreso...
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12" th:if="${#lists.isEmpty(missions)}">
+                    <div class="bento-card p-4 text-center text-secondary">
+                        <i class="bi bi-flag fs-2 text-neon d-block mb-2"></i>
+                        No hay misiones activas en este momento. ¡Pronto lanzaremos nuevos retos!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

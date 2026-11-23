@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(pageTitle, activeTab, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">GymLink | Club Atlético</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link th:href="@{/css/gymlink.css}" rel="stylesheet">
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- Top-Bar Minimalista del Atleta -->
+    <header class="member-topbar sticky-top py-2 px-3 px-lg-4">
+        <div class="container-xl d-flex align-items-center justify-content-between gap-2">
+            <a th:href="@{/member/dashboard}" class="d-flex align-items-center gap-2 text-decoration-none">
+                <div class="rounded-3 d-flex align-items-center justify-content-center bg-neon-soft"
+                     style="width: 38px; height: 38px;">
+                    <i class="bi bi-lightning-charge-fill fs-5"></i>
+                </div>
+                <div class="lh-1">
+                    <span class="fw-bolder text-white fs-5 tracking-tight">GYM<span class="text-neon">LINK</span></span>
+                    <small class="d-block text-secondary" style="font-size: 0.68rem;">ATHLETE OS</small>
+                </div>
+            </a>
+
+            <!-- HUD Telemetría en Tiempo Real -->
+            <div class="d-flex align-items-center gap-2 gap-md-3 flex-wrap justify-content-end">
+                <span class="vip-badge d-none d-sm-inline-flex"
+                      th:classappend="'vip-' + (${currentMember != null ? currentMember.vipRank : 'ORO'})">
+                    <i class="bi bi-gem"></i>
+                    <span th:text="${currentMember != null ? currentMember.vipRank : 'ORO'}">ORO</span>
+                </span>
+
+                <div class="px-2 px-md-3 py-1 rounded-pill bg-fire-soft border border-warning border-opacity-25 d-flex align-items-center gap-1"
+                     title="Racha de días consecutivos">
+                    <i class="bi bi-fire"></i>
+                    <span class="font-mono-tabular fw-bold"
+                          th:text="${currentMember != null ? currentMember.streakDays : 14}">14</span>
+                    <span class="d-none d-md-inline small fw-semibold">días</span>
+                </div>
+
+                <div class="px-2 px-md-3 py-1 rounded-pill bg-dark border border-info border-opacity-25 text-info d-flex align-items-center gap-1"
+                     title="Escudos Protectores de Racha">
+                    <i class="bi bi-shield-fill-check"></i>
+                    <span class="font-mono-tabular fw-bold"
+                          th:text="${currentMember != null ? currentMember.shields : 2}">2</span>
+                </div>
+
+                <div class="px-2 px-md-3 py-1 rounded-pill bg-dark border border-secondary border-opacity-25 d-none d-md-flex align-items-center gap-1"
+                     title="Experiencia Acumulada">
+                    <i class="bi bi-stars text-warning"></i>
+                    <span class="font-mono-tabular fw-bold text-white"
+                          th:text="${currentMember != null ? #numbers.formatInteger(currentMember.xp, 1, 'POINT') : '4.850'}">4.850</span>
+                    <small class="text-secondary">XP</small>
+                </div>
+
+                <a th:href="@{/member/rewards}"
+                   class="px-3 py-1 rounded-pill bg-neon-soft border border-success border-opacity-25 text-decoration-none d-flex align-items-center gap-1"
+                   title="Saldo disponible para Tienda VIP">
+                    <i class="bi bi-coin"></i>
+                    <span class="font-mono-tabular fw-bolder"
+                          th:text="${currentMember != null ? #numbers.formatInteger(currentMember.pointsBalance, 1, 'POINT') : '1.420'}">1.420</span>
+                    <small class="fw-bold">PTS</small>
+                </a>
+
+                <div class="dropdown">
+                    <button class="btn btn-ghost-dark rounded-circle p-0 d-flex align-items-center justify-content-center"
+                            style="width: 38px; height: 38px;" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="fw-bold text-neon small"
+                              th:text="${currentMember != null ? currentMember.initials : 'MV'}">MV</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary border-opacity-25 rounded-4 shadow-lg p-2">
+                        <li class="px-3 py-2 border-bottom border-secondary border-opacity-25 mb-1">
+                            <div class="fw-bold text-white small"
+                                 th:text="${currentMember != null ? currentMember.fullName : 'Mateo Vargas'}">Mateo Vargas</div>
+                            <div class="text-secondary" style="font-size: 0.72rem;"
+                                 th:text="${currentMember != null ? currentMember.email : 'mateo@gymlink.fit'}">mateo@gymlink.fit</div>
+                        </li>
+                        <li>
+                            <a class="dropdown-item rounded-3 small" th:href="@{/member/history}">
+                                <i class="bi bi-receipt me-2 text-neon"></i>Extracto de Puntos
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item rounded-3 small" th:href="@{/member/wallet}">
+                                <i class="bi bi-wallet2 me-2 text-info"></i>Mi Billetera Digital
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider border-secondary border-opacity-25"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post">
+                                <button type="submit" class="dropdown-item rounded-3 small text-danger">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Alertas Flash del Backend -->
+    <div class="container-xl mt-3" th:if="${successMessage != null or errorMessage != null}">
+        <div th:if="${successMessage}" class="alert alert-success bg-neon-soft border border-success border-opacity-25 rounded-4 d-flex align-items-center justify-content-between">
+            <div><i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}">Operación exitosa</span></div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger bg-fire-soft border border-danger border-opacity-25 text-white rounded-4 d-flex align-items-center justify-content-between">
+            <div><i class="bi bi-exclamation-octagon-fill me-2 text-fire"></i><span th:text="${errorMessage}">Error</span></div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="container-xl py-4 member-main-wrapper flex-grow-1">
+        <th:block th:replace="${content}"></th:block>
+    </main>
+
+    <!-- Dock Flotante Central Inferior -->
+    <nav class="floating-dock-wrapper" aria-label="Navegación principal del atleta">
+        <div class="floating-dock">
+            <a th:href="@{/member/dashboard}" class="dock-item"
+               th:classappend="${activeTab == 'dashboard'} ? 'active'">
+                <i class="bi bi-grid-1x2-fill fs-5"></i>
+                <span>Inicio</span>
+            </a>
+            <a th:href="@{/member/feed}" class="dock-item"
+               th:classappend="${activeTab == 'feed'} ? 'active'">
+                <i class="bi bi-fire fs-5"></i>
+                <span>Club Social</span>
+            </a>
+            <a th:href="@{/member/rewards}" class="dock-item"
+               th:classappend="${activeTab == 'rewards'} ? 'active'">
+                <i class="bi bi-bag-heart-fill fs-5"></i>
+                <span>Tienda VIP</span>
+            </a>
+            <a th:href="@{/member/wallet}" class="dock-item"
+               th:classappend="${activeTab == 'wallet'} ? 'active'">
+                <i class="bi bi-qr-code-scan fs-5"></i>
+                <span>Mi Billetera</span>
+            </a>
+            <a th:href="@{/member/leaderboard}" class="dock-item"
+               th:classappend="${activeTab == 'leaderboard'} ? 'active'">
+                <i class="bi bi-trophy-fill fs-5"></i>
+                <span>Ranking</span>
+            </a>
+            <a th:href="@{/member/history}" class="dock-item"
+               th:classappend="${activeTab == 'history'} ? 'active'">
+                <i class="bi bi-clock-history fs-5"></i>
+                <span>Extracto</span>
+            </a>
+        </div>
+    </nav>
+
+    <div id="gymlinkToastContainer" class="toast-container position-fixed top-0 end-0 p-3 mt-5" style="z-index: 1090;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/gymlink.js}"></script>
+</body>
+</html>

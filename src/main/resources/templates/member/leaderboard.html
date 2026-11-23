@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/member_layout :: layout('Ranking Top Atletas | GymLink', 'leaderboard', ~{::main})}">
+<body>
+<main>
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <span class="text-neon small fw-bold text-uppercase">Salón de la Fama</span>
+            <h1 class="fw-bolder text-white mb-0">Ranking Top Atletas</h1>
+        </div>
+        <span class="badge bg-dark border border-secondary border-opacity-25 rounded-pill px-3 py-2 text-secondary">
+            Clasificación ordenada por XP acumulado
+        </span>
+    </div>
+
+    <!-- Podio Visual Top 3 -->
+    <div class="row g-4 mb-5 align-items-end">
+        <!-- Puesto 2 -->
+        <div class="col-md-4 order-2 order-md-1" th:if="${topAthletes != null and #lists.size(topAthletes) >= 2}"
+             th:with="ath=${topAthletes[1]}">
+            <div class="bento-card podium-2 p-4 text-center cursor-pointer"
+                 data-bs-toggle="modal" data-bs-target="#athleteProfileModal"
+                 th:attr="data-athlete-name=${ath.fullName}, data-athlete-initials=${ath.initials}, data-athlete-rank=${ath.vipRank}, data-athlete-xp=${ath.xp}, data-athlete-streak=${ath.streakDays}, data-athlete-checkins=${ath.totalCheckins}, data-athlete-bio=${ath.bio}">
+                <div class="badge bg-secondary bg-opacity-25 text-white rounded-pill px-3 py-1 mb-3">#2 PLATA</div>
+                <div class="avatar-circle avatar-circle-lg mx-auto mb-3" th:text="${ath.initials}">SR</div>
+                <h5 class="fw-bold text-white mb-1" th:text="${ath.fullName}">Sofía Restrepo</h5>
+                <span class="vip-badge mb-3" th:classappend="'vip-' + ${ath.vipRank}" th:text="${ath.vipRank}">ORO</span>
+                <div class="font-mono-tabular fs-4 fw-bolder text-white" th:text="${#numbers.formatInteger(ath.xp, 1, 'POINT')} + ' XP'">7.400 XP</div>
+                <small class="text-fire fw-semibold">🔥 <span th:text="${ath.streakDays}">22</span> días de racha</small>
+            </div>
+        </div>
+
+        <!-- Puesto 1 -->
+        <div class="col-md-4 order-1 order-md-2" th:if="${topAthletes != null and #lists.size(topAthletes) >= 1}"
+             th:with="ath=${topAthletes[0]}">
+            <div class="bento-card podium-1 p-4 p-lg-5 text-center shadow-lg cursor-pointer"
+                 data-bs-toggle="modal" data-bs-target="#athleteProfileModal"
+                 th:attr="data-athlete-name=${ath.fullName}, data-athlete-initials=${ath.initials}, data-athlete-rank=${ath.vipRank}, data-athlete-xp=${ath.xp}, data-athlete-streak=${ath.streakDays}, data-athlete-checkins=${ath.totalCheckins}, data-athlete-bio=${ath.bio}">
+                <div class="mb-2"><i class="bi bi-trophy-fill fs-1 text-gold"></i></div>
+                <div class="badge bg-warning bg-opacity-25 text-gold rounded-pill px-3 py-1 mb-3">#1 LÍDER DEL CLUB</div>
+                <div class="avatar-circle avatar-circle-lg mx-auto mb-3 border-warning" th:text="${ath.initials}">DG</div>
+                <h4 class="fw-bolder text-white mb-1" th:text="${ath.fullName}">Daniel Gómez</h4>
+                <span class="vip-badge mb-3" th:classappend="'vip-' + ${ath.vipRank}" th:text="${ath.vipRank}">TITAN</span>
+                <div class="font-mono-tabular fs-3 fw-bolder text-neon" th:text="${#numbers.formatInteger(ath.xp, 1, 'POINT')} + ' XP'">9.850 XP</div>
+                <small class="text-fire fw-bold">🔥 <span th:text="${ath.streakDays}">38</span> días de racha</small>
+            </div>
+        </div>
+
+        <!-- Puesto 3 -->
+        <div class="col-md-4 order-3" th:if="${topAthletes != null and #lists.size(topAthletes) >= 3}"
+             th:with="ath=${topAthletes[2]}">
+            <div class="bento-card podium-3 p-4 text-center cursor-pointer"
+                 data-bs-toggle="modal" data-bs-target="#athleteProfileModal"
+                 th:attr="data-athlete-name=${ath.fullName}, data-athlete-initials=${ath.initials}, data-athlete-rank=${ath.vipRank}, data-athlete-xp=${ath.xp}, data-athlete-streak=${ath.streakDays}, data-athlete-checkins=${ath.totalCheckins}, data-athlete-bio=${ath.bio}">
+                <div class="badge bg-fire-soft rounded-pill px-3 py-1 mb-3">#3 BRONCE</div>
+                <div class="avatar-circle avatar-circle-lg mx-auto mb-3" th:text="${ath.initials}">LM</div>
+                <h5 class="fw-bold text-white mb-1" th:text="${ath.fullName}">Laura Méndez</h5>
+                <span class="vip-badge mb-3" th:classappend="'vip-' + ${ath.vipRank}" th:text="${ath.vipRank}">ORO</span>
+                <div class="font-mono-tabular fs-4 fw-bolder text-white" th:text="${#numbers.formatInteger(ath.xp, 1, 'POINT')} + ' XP'">6.200 XP</div>
+                <small class="text-fire fw-semibold">🔥 <span th:text="${ath.streakDays}">19</span> días de racha</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla Completa Top 10 -->
+    <div class="bento-card overflow-hidden">
+        <div class="p-4 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-white mb-0">Clasificación Top 10</h5>
+            <small class="text-secondary">Haz clic en cualquier atleta para ver su tarjeta</small>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-athletic table-hover align-middle mb-0">
+                <thead>
+                <tr>
+                    <th class="ps-4">Posición</th>
+                    <th>Atleta</th>
+                    <th>Rango VIP</th>
+                    <th>Racha</th>
+                    <th class="pe-4 text-end">XP Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="ath, iter : ${topAthletes}" style="cursor: pointer;"
+                    data-bs-toggle="modal" data-bs-target="#athleteProfileModal"
+                    th:attr="data-athlete-name=${ath.fullName},
+                             data-athlete-initials=${ath.initials},
+                             data-athlete-rank=${ath.vipRank},
+                             data-athlete-xp=${ath.xp},
+                             data-athlete-streak=${ath.streakDays},
+                             data-athlete-checkins=${ath.totalCheckins},
+                             data-athlete-bio=${ath.bio}">
+                    <td class="ps-4">
+                        <span class="font-mono-tabular fw-bolder fs-5"
+                              th:classappend="${iter.count == 1} ? 'text-gold' : (${iter.count <= 3} ? 'text-neon' : 'text-secondary')"
+                              th:text="'#' + ${iter.count}">#1</span>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar-circle" th:text="${ath.initials}">DG</div>
+                            <div>
+                                <div class="fw-bold text-white" th:text="${ath.fullName}">Daniel Gómez</div>
+                                <small class="text-secondary" th:text="${ath.totalCheckins} + ' entrenos'">85 entrenos</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="vip-badge" th:classappend="'vip-' + ${ath.vipRank}" th:text="${ath.vipRank}">TITAN</span>
+                    </td>
+                    <td>
+                        <span class="font-mono-tabular fw-bold text-fire">🔥 <span th:text="${ath.streakDays}">38</span>d</span>
+                    </td>
+                    <td class="pe-4 text-end">
+                        <span class="font-mono-tabular fw-bolder text-neon fs-5"
+                              th:text="${#numbers.formatInteger(ath.xp, 1, 'POINT')}">9.850</span>
+                        <small class="text-secondary">XP</small>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Perfil Atleta -->
+    <div class="modal fade" id="athleteProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border border-secondary border-opacity-25 rounded-4">
+                <div class="modal-header border-secondary border-opacity-25">
+                    <h5 class="modal-title fw-bold text-white">Ficha de Atleta</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div id="modalAthleteInitials" class="avatar-circle avatar-circle-lg mx-auto mb-3">GL</div>
+                    <h4 id="modalAthleteName" class="fw-bolder text-white mb-1">Atleta</h4>
+                    <span id="modalAthleteRank" class="vip-badge vip-ORO mb-3">ORO</span>
+                    <p id="modalAthleteBio" class="text-secondary small mb-4">Atleta GymLink.</p>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <div class="p-3 rounded-4 bg-black border border-secondary border-opacity-25">
+                                <small class="text-secondary d-block">XP</small>
+                                <span id="modalAthleteXp" class="font-mono-tabular fw-bold text-neon fs-5">0</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-3 rounded-4 bg-black border border-secondary border-opacity-25">
+                                <small class="text-secondary d-block">Racha</small>
+                                <span id="modalAthleteStreak" class="font-mono-tabular fw-bold text-fire fs-5">0d</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-3 rounded-4 bg-black border border-secondary border-opacity-25">
+                                <small class="text-secondary d-block">Check-ins</small>
+                                <span id="modalAthleteCheckins" class="font-mono-tabular fw-bold text-white fs-5">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>
