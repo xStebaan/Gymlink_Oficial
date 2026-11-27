@@ -2,7 +2,10 @@
    GYMLINK — INTERACTIVE VANILLA JS ENGINE
    ========================================================= */
 
+let weeklyChartInstance = null;
+
 document.addEventListener('DOMContentLoaded', () => {
+    initThemeToggle();
     initRewardFilters();
     initPostImagePreview();
     initFeedTags();
@@ -15,8 +18,45 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Muestra una notificación Toast de Bootstrap 5.3
+ * Modo Claro / Oscuro con persistencia en localStorage
  */
+function initThemeToggle() {
+    const savedTheme = localStorage.getItem('gymlink-theme') || 'dark';
+    applyTheme(savedTheme, false);
+
+    const toggleButtons = document.querySelectorAll('[data-theme-toggle]');
+    toggleButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-bs-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next, true);
+        });
+    });
+}
+
+function applyTheme(theme, notifyChart) {
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    localStorage.setItem('gymlink-theme', theme);
+
+    document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+        const icon = btn.querySelector('i');
+        const label = btn.querySelector('[data-theme-label]');
+        if (icon) {
+            icon.className = theme === 'dark' ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill text-primary';
+        }
+        if (label) {
+            label.textContent = theme === 'dark' ? 'Claro' : 'Oscuro';
+        }
+        btn.setAttribute('title', theme === 'dark' ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro');
+    });
+
+    if (notifyChart && weeklyChartInstance) {
+        weeklyChartInstance.destroy();
+        weeklyChartInstance = null;
+        initAdminCharts();
+    }
+}
+
 function showGymToast(message, type = 'success') {
     const container = document.getElementById('gymlinkToastContainer');
     if (!container) return;
@@ -29,7 +69,7 @@ function showGymToast(message, type = 'success') {
     };
 
     const toastEl = document.createElement('div');
-    toastEl.className = 'toast align-items-center bg-dark border border-secondary border-opacity-50 text-white rounded-4 shadow-lg';
+    toastEl.className = 'toast align-items-center bg-dark border border-secondary border-opacity-50 rounded-4 shadow-lg';
     toastEl.setAttribute('role', 'alert');
     toastEl.setAttribute('aria-live', 'assertive');
     toastEl.setAttribute('aria-atomic', 'true');
@@ -38,7 +78,7 @@ function showGymToast(message, type = 'success') {
         <div class="d-flex align-items-center px-3 py-2">
             <i class="bi ${iconMap[type] || iconMap.success} fs-5 me-2"></i>
             <div class="toast-body fw-medium px-1">${message}</div>
-            <button type="button" class="btn-close btn-close-white ms-auto me-1" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+            <button type="button" class="btn-close ms-auto me-1" data-bs-dismiss="toast" aria-label="Cerrar"></button>
         </div>
     `;
 
@@ -48,9 +88,6 @@ function showGymToast(message, type = 'success') {
     toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
 }
 
-/**
- * Copia el PIN digital (ej. Spotify Premium) al portapapeles con feedback visual
- */
 function copyPinToClipboard(pinCode, buttonEl) {
     if (!pinCode) return;
 
@@ -86,9 +123,6 @@ function fallbackCopy(text, callback) {
     callback();
 }
 
-/**
- * Filtros instantáneos en Tienda VIP (member/rewards.html)
- */
 function initRewardFilters() {
     const filterButtons = document.querySelectorAll('[data-reward-filter]');
     const rewardCards = document.querySelectorAll('[data-reward-category]');
@@ -140,9 +174,6 @@ function initRewardFilters() {
     }
 }
 
-/**
- * Vista previa de imagen al crear publicación en Club Social
- */
 function initPostImagePreview() {
     const imageInput = document.getElementById('postImageUrlInput');
     const fileInput = document.getElementById('postImageFileInput');
@@ -187,9 +218,6 @@ function initPostImagePreview() {
     }
 }
 
-/**
- * Selector de etiquetas rápidas en Feed (#Fuerza, #Cardio, etc.)
- */
 function initFeedTags() {
     const tagButtons = document.querySelectorAll('[data-feed-tag]');
     const hiddenTagInput = document.getElementById('selectedPostTagInput');
@@ -210,9 +238,6 @@ function initFeedTags() {
     });
 }
 
-/**
- * Modal de Perfil Público del Atleta (Feed & Leaderboard)
- */
 function initAthleteProfileModal() {
     const modalEl = document.getElementById('athleteProfileModal');
     if (!modalEl) return;
@@ -242,9 +267,6 @@ function initAthleteProfileModal() {
     });
 }
 
-/**
- * Modal de Confirmación de Canje en Tienda VIP
- */
 function initRedeemModal() {
     const modalEl = document.getElementById('redeemConfirmModal');
     if (!modalEl) return;
@@ -267,9 +289,6 @@ function initRedeemModal() {
     });
 }
 
-/**
- * Modal de QR Grande en Mi Billetera
- */
 function initQrWalletModal() {
     const modalEl = document.getElementById('walletQrModal');
     if (!modalEl) return;
@@ -293,9 +312,6 @@ function initQrWalletModal() {
     });
 }
 
-/**
- * Renderizado de Gráfica Semanal con Chart.js en Admin Dashboard
- */
 function initAdminCharts() {
     const canvas = document.getElementById('weeklyAttendanceChart');
     if (!canvas || typeof Chart === 'undefined') return;
@@ -310,12 +326,17 @@ function initAdminCharts() {
         console.warn('Usando datos por defecto para gráfica semanal');
     }
 
+    const isLight = document.documentElement.getAttribute('data-bs-theme') === 'light';
+    const accent = isLight ? '#00a86b' : '#00f59b';
+    const tickColor = isLight ? '#475569' : '#a1a1aa';
+    const gridColor = isLight ? 'rgba(15, 23, 42, 0.08)' : 'rgba(255,255,255,0.06)';
+
     const ctx = canvas.getContext('2d');
     const gradient = ctx.createLinearGradient(0, 0, 0, 280);
-    gradient.addColorStop(0, 'rgba(0, 245, 155, 0.42)');
-    gradient.addColorStop(1, 'rgba(0, 245, 155, 0.01)');
+    gradient.addColorStop(0, isLight ? 'rgba(0, 168, 107, 0.42)' : 'rgba(0, 245, 155, 0.42)');
+    gradient.addColorStop(1, 'rgba(0, 245, 155, 0.02)');
 
-    new Chart(ctx, {
+    weeklyChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
@@ -323,10 +344,9 @@ function initAdminCharts() {
                 label: 'Asistencias',
                 data: values,
                 backgroundColor: gradient,
-                borderColor: '#00f59b',
+                borderColor: accent,
                 borderWidth: 2,
-                borderRadius: 10,
-                hoverBackgroundColor: 'rgba(0, 245, 155, 0.7)'
+                borderRadius: 10
             }]
         },
         options: {
@@ -335,32 +355,27 @@ function initAdminCharts() {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: '#18181d',
+                    backgroundColor: isLight ? '#0f172a' : '#18181d',
                     titleColor: '#fafafa',
                     bodyColor: '#00f59b',
-                    borderColor: 'rgba(255,255,255,0.12)',
-                    borderWidth: 1,
                     padding: 10
                 }
             },
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { color: '#a1a1aa', font: { family: 'Inter', weight: '600' } }
+                    ticks: { color: tickColor, font: { family: 'Inter', weight: '600' } }
                 },
                 y: {
                     beginAtZero: true,
-                    grid: { color: 'rgba(255,255,255,0.06)' },
-                    ticks: { color: '#71717a', font: { family: 'JetBrains Mono' } }
+                    grid: { color: gridColor },
+                    ticks: { color: tickColor, font: { family: 'JetBrains Mono' } }
                 }
             }
         }
     });
 }
 
-/**
- * Búsqueda en tiempo real para tablas de Admin (Miembros, Entregas, Premios)
- */
 function initTableSearchFilters() {
     const searchInputs = document.querySelectorAll('[data-table-search]');
     searchInputs.forEach(input => {
@@ -378,7 +393,6 @@ function initTableSearchFilters() {
         });
     });
 
-    // Filtro por estado en Entregas (admin/redemptions.html)
     const statusFilterBtns = document.querySelectorAll('[data-redemption-status]');
     const redemptionsTable = document.getElementById('redemptionsTable');
     if (statusFilterBtns.length && redemptionsTable) {
@@ -402,9 +416,6 @@ function initTableSearchFilters() {
     }
 }
 
-/**
- * Autocompletado rápido en Terminal Check-in
- */
 function initCheckinQuickFilter() {
     const chips = document.querySelectorAll('[data-quick-doc]');
     const input = document.getElementById('checkinSearchInput');
@@ -418,9 +429,6 @@ function initCheckinQuickFilter() {
     });
 }
 
-/**
- * Relleno de formulario en Auth Login con credenciales Demo
- */
 function fillDemoLogin(email, password) {
     const emailInput = document.getElementById('loginEmail');
     const passInput = document.getElementById('loginPassword');
@@ -431,9 +439,6 @@ function fillDemoLogin(email, password) {
     }
 }
 
-/**
- * Precarga modal de edición de premio en Admin
- */
 function openRewardFormModal(btn) {
     const modal = document.getElementById('rewardFormModal');
     if (!modal) return;

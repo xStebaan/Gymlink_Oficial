@@ -1,10 +1,11 @@
 /* =========================================================
-   GYMLINK — ATHLETIC DARK MODE & BENTO GRID DESIGN SYSTEM
+   GYMLINK — ATHLETIC DARK & LIGHT MODE DESIGN SYSTEM
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap');
 
-:root {
+:root,
+[data-bs-theme="dark"] {
     --gl-bg-deep: #09090b;
     --gl-bg-surface: #121215;
     --gl-bg-elevated: #18181d;
@@ -27,12 +28,33 @@
     --gl-font-mono: 'JetBrains Mono', monospace;
 }
 
+[data-bs-theme="light"] {
+    --gl-bg-deep: #f4f6f9;
+    --gl-bg-surface: #ffffff;
+    --gl-bg-elevated: #f8fafc;
+    --gl-border-subtle: rgba(15, 23, 42, 0.10);
+    --gl-border-hover: rgba(0, 168, 107, 0.45);
+
+    --gl-neon: #00a86b;
+    --gl-neon-dim: rgba(0, 168, 107, 0.12);
+    --gl-fire: #ea580c;
+    --gl-fire-dim: rgba(234, 88, 12, 0.12);
+    --gl-cyan: #0284c7;
+    --gl-purple: #7e22ce;
+    --gl-gold: #d97706;
+
+    --gl-text-primary: #0f172a;
+    --gl-text-secondary: #475569;
+    --gl-text-muted: #64748b;
+}
+
 html, body {
     background-color: var(--gl-bg-deep);
     color: var(--gl-text-primary);
     font-family: var(--gl-font-sans);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .font-mono-tabular {
@@ -49,19 +71,27 @@ html, body {
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: var(--gl-bg-deep); }
-::-webkit-scrollbar-thumb { background: #27272a; border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 999px; }
+[data-bs-theme="light"] ::-webkit-scrollbar-thumb { background: #cbd5e1; }
 
 /* Bento Cards */
 .bento-card {
     background-color: var(--gl-bg-surface);
     border: 1px solid var(--gl-border-subtle);
     border-radius: 1.25rem;
-    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, background-color 0.25s ease;
 }
 
 .bento-card:hover {
     border-color: rgba(255, 255, 255, 0.16);
+}
+
+[data-bs-theme="light"] .bento-card {
+    box-shadow: 0 4px 18px -6px rgba(15, 23, 42, 0.08);
+}
+
+[data-bs-theme="light"] .bento-card:hover {
+    border-color: rgba(15, 23, 42, 0.22);
 }
 
 .bento-card-interactive:hover {
@@ -77,9 +107,16 @@ html, body {
     border: 1px solid rgba(0, 245, 155, 0.22);
 }
 
+[data-bs-theme="light"] .bento-hero {
+    background: radial-gradient(circle at top right, rgba(0, 168, 107, 0.14), transparent 55%),
+                radial-gradient(circle at bottom left, rgba(234, 88, 12, 0.08), transparent 50%),
+                #ffffff;
+    border: 1px solid rgba(0, 168, 107, 0.28);
+}
+
 /* Buttons */
 .btn-neon {
-    background-color: var(--gl-neon);
+    background-color: #00f59b;
     color: #050507;
     font-weight: 700;
     border: none;
@@ -117,6 +154,17 @@ html, body {
     background-color: rgba(255, 255, 255, 0.09);
     border-color: rgba(255, 255, 255, 0.22);
     color: #fff;
+}
+
+[data-bs-theme="light"] .btn-ghost-dark {
+    background-color: rgba(15, 23, 42, 0.04);
+    color: #0f172a;
+}
+
+[data-bs-theme="light"] .btn-ghost-dark:hover {
+    background-color: rgba(15, 23, 42, 0.10);
+    border-color: rgba(15, 23, 42, 0.20);
+    color: #0f172a;
 }
 
 /* VIP Rank Badges */
@@ -157,12 +205,21 @@ html, body {
     box-shadow: 0 0 14px rgba(0, 245, 155, 0.2);
 }
 
+[data-bs-theme="light"] .vip-BRONCE { color: #9a3412; }
+[data-bs-theme="light"] .vip-PLATA { background: rgba(100, 116, 139, 0.14); color: #334155; border-color: rgba(100, 116, 139, 0.35); }
+[data-bs-theme="light"] .vip-ORO { color: #b45309; }
+[data-bs-theme="light"] .vip-TITAN { color: #047857; }
+
 /* Progress Bars */
 .progress-athletic {
     height: 10px;
     background-color: rgba(255, 255, 255, 0.06);
     border-radius: 999px;
     overflow: hidden;
+}
+
+[data-bs-theme="light"] .progress-athletic {
+    background-color: rgba(15, 23, 42, 0.08);
 }
 
 .progress-bar-neon {
@@ -190,6 +247,10 @@ html, body {
     transition: all 0.2s ease;
 }
 
+[data-bs-theme="light"] .day-pill {
+    background: #f8fafc;
+}
+
 .day-pill.done {
     background: var(--gl-fire-dim);
     border-color: rgba(255, 94, 26, 0.45);
@@ -213,6 +274,10 @@ html, body {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--gl-border-subtle);
+}
+
+[data-bs-theme="light"] .member-topbar {
+    background: rgba(255, 255, 255, 0.88);
 }
 
 .member-main-wrapper {
@@ -241,6 +306,12 @@ html, body {
     gap: 0.35rem;
 }
 
+[data-bs-theme="light"] .floating-dock {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(15, 23, 42, 0.12);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+}
+
 .dock-item {
     display: flex;
     align-items: center;
@@ -260,8 +331,13 @@ html, body {
     background: rgba(255, 255, 255, 0.06);
 }
 
+[data-bs-theme="light"] .dock-item:hover {
+    color: #0f172a;
+    background: rgba(15, 23, 42, 0.06);
+}
+
 .dock-item.active {
-    background: var(--gl-neon);
+    background: #00f59b;
     color: #050507;
     box-shadow: 0 0 18px rgba(0, 245, 155, 0.35);
 }
@@ -274,11 +350,21 @@ html, body {
     position: relative;
 }
 
+[data-bs-theme="light"] .digital-pass {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border-color: rgba(0, 168, 107, 0.45);
+}
+
 .pin-box {
     background: #09090b;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 0.75rem;
     padding: 0.55rem 0.85rem;
+}
+
+[data-bs-theme="light"] .pin-box {
+    background: #f1f5f9;
+    border-color: rgba(15, 23, 42, 0.12);
 }
 
 /* Admin Mission Control Sidebar */
@@ -299,6 +385,10 @@ html, body {
     flex-direction: column;
 }
 
+[data-bs-theme="light"] .admin-sidebar {
+    background: #ffffff;
+}
+
 .admin-nav-link {
     display: flex;
     align-items: center;
@@ -317,6 +407,11 @@ html, body {
     background: rgba(255, 255, 255, 0.05);
 }
 
+[data-bs-theme="light"] .admin-nav-link:hover {
+    color: #0f172a;
+    background: rgba(15, 23, 42, 0.05);
+}
+
 .admin-nav-link.active {
     background: var(--gl-neon-dim);
     color: var(--gl-neon);
@@ -330,12 +425,16 @@ html, body {
     background: var(--gl-bg-deep);
 }
 
-/* Tables Dark Athletic */
+/* Tables */
 .table-athletic {
     --bs-table-bg: transparent;
     --bs-table-color: var(--gl-text-primary);
     --bs-table-border-color: var(--gl-border-subtle);
     --bs-table-hover-bg: rgba(255, 255, 255, 0.03);
+}
+
+[data-bs-theme="light"] .table-athletic {
+    --bs-table-hover-bg: rgba(15, 23, 42, 0.03);
 }
 
 .table-athletic thead th {
@@ -363,6 +462,11 @@ html, body {
     flex-shrink: 0;
 }
 
+[data-bs-theme="light"] .avatar-circle {
+    background: linear-gradient(135deg, #e2e8f0, #f8fafc);
+    border-color: rgba(15, 23, 42, 0.15);
+}
+
 .avatar-circle-lg {
     width: 68px;
     height: 68px;
@@ -373,6 +477,52 @@ html, body {
 .podium-1 { border-color: rgba(251, 191, 36, 0.55) !important; background: radial-gradient(circle at top, rgba(251, 191, 36, 0.12), #121215 70%); }
 .podium-2 { border-color: rgba(203, 213, 225, 0.45) !important; background: radial-gradient(circle at top, rgba(203, 213, 225, 0.10), #121215 70%); }
 .podium-3 { border-color: rgba(205, 127, 50, 0.45) !important; background: radial-gradient(circle at top, rgba(205, 127, 50, 0.10), #121215 70%); }
+
+[data-bs-theme="light"] .podium-1 { background: radial-gradient(circle at top, rgba(251, 191, 36, 0.18), #ffffff 70%); }
+[data-bs-theme="light"] .podium-2 { background: radial-gradient(circle at top, rgba(148, 163, 184, 0.18), #ffffff 70%); }
+[data-bs-theme="light"] .podium-3 { background: radial-gradient(circle at top, rgba(205, 127, 50, 0.16), #ffffff 70%); }
+
+/* Adaptación automática de utilidades Bootstrap en Modo Claro */
+[data-bs-theme="light"] .text-white {
+    color: var(--gl-text-primary) !important;
+}
+
+[data-bs-theme="light"] .bg-dark {
+    background-color: #f1f5f9 !important;
+    color: var(--gl-text-primary) !important;
+}
+
+[data-bs-theme="light"] .bg-black {
+    background-color: #e2e8f0 !important;
+    color: var(--gl-text-primary) !important;
+}
+
+[data-bs-theme="light"] .modal-content,
+[data-bs-theme="light"] .dropdown-menu,
+[data-bs-theme="light"] .offcanvas {
+    background-color: #ffffff !important;
+    color: var(--gl-text-primary) !important;
+}
+
+[data-bs-theme="light"] .dropdown-item {
+    color: var(--gl-text-primary);
+}
+
+[data-bs-theme="light"] .form-control,
+[data-bs-theme="light"] .form-select,
+[data-bs-theme="light"] .input-group-text {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: rgba(15, 23, 42, 0.16) !important;
+}
+
+[data-bs-theme="light"] .btn-close-white {
+    filter: none;
+}
+
+[data-bs-theme="light"] .login-brand-panel .text-white {
+    color: #ffffff !important;
+}
 
 @media (max-width: 991.98px) {
     .admin-sidebar {
